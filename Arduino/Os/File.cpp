@@ -3,11 +3,11 @@
 #include <Fw/Types/Assert.hpp>
 #include <SD.h>
 
-File fd = nullptr;
-
 namespace Os {
 
-    File::File() :m_fd(0),m_mode(OPEN_NO_MODE),m_lastError(0) {}
+    ::File fd = nullptr;
+
+    File::File() : m_fd(0), m_mode(OPEN_NO_MODE), m_lastError(0) {}
 
     File::~File() {
         if (this->m_mode != OPEN_NO_MODE) {

@@ -32,7 +32,6 @@ if (FPRIME_ARDUINO)
         # Baremetal virtualization implementations
         "${FPRIME_FRAMEWORK_PATH}/Os/Baremetal/Queue.cpp"
         "${FPRIME_FRAMEWORK_PATH}/Os/Baremetal/Task.cpp"
-        "${FPRIME_FRAMEWORK_PATH}/Os/Baremetal/FileSystem.cpp"
         "${FPRIME_FRAMEWORK_PATH}/Os/Baremetal/Mutex.cpp"
         "${FPRIME_FRAMEWORK_PATH}/Os/Baremetal/SystemResources.cpp"
         # Non-OS based queue implementations
@@ -42,6 +41,7 @@ if (FPRIME_ARDUINO)
         "${CMAKE_CURRENT_LIST_DIR}/IntervalTimer.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/StreamLog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/File.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/FileSystem.cpp"
     )
     target_use_arduino_libraries("TimeLib" "SD")
     register_fprime_module()
