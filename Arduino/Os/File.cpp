@@ -5,7 +5,7 @@
 
 namespace Os {
 
-    ::File fd = nullptr;
+    ::File fd;
 
     File::File() : m_fd(0), m_mode(OPEN_NO_MODE), m_lastError(0) {}
 
@@ -94,7 +94,7 @@ namespace Os {
         }
 
         if (fd.available()) {
-            fd.read(buffer, size);
+            fd.read(static_cast<U8*>(buffer), size);
             return OP_OK;
         }
 
@@ -125,7 +125,6 @@ namespace Os {
     void File::close() {
         if (this->m_mode != OPEN_NO_MODE) {
             (void) fd.close();
-            fd = nullptr;
         }
         this->m_mode = OPEN_NO_MODE;
     }
