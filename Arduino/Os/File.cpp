@@ -5,14 +5,13 @@
 
 namespace Os {
 
-    ::File fd;
-
-    File::File() : m_fd(0), m_mode(OPEN_NO_MODE), m_lastError(0) {}
+    File::File() : m_fd(reinterpret_cast<NATIVE_INT_TYPE>(new ::File)), m_mode(OPEN_NO_MODE), m_lastError(0) {}
 
     File::~File() {
         if (this->m_mode != OPEN_NO_MODE) {
             this->close();
         }
+        delete reinterpret_cast<::File*>(m_fd);
     }
 
     File::Status File::open(const char* fileName, File::Mode mode) {
@@ -47,9 +46,9 @@ namespace Os {
                 break;
         }
 
-        fd = SD.open(fileName, flags);
+        *reinterpret_cast<::File*>(m_fd) = SD.open(fileName, flags);
 
-        if(!fd) {
+        if(reinterpret_cast<::File*>(m_fd) == nullptr) {
             return File::Status::NOT_OPENED;
         }
 
@@ -59,11 +58,7 @@ namespace Os {
     }
 
     bool File::isOpen() {
-        if(fd) {
-            return true;
-        }
-
-        return false;
+        return (reinterpret_cast<::File*>(m_fd) != nullptr);
     }
 
     File::Status File::seek(NATIVE_INT_TYPE offset, bool absolute) {
@@ -72,7 +67,7 @@ namespace Os {
             return NOT_OPENED;
         }
 
-        if (fd.seek(offset)) {
+        if (reinterpret_cast<::File*>(m_fd)->seek(offset)) {
             return OP_OK;
         }
 
@@ -93,8 +88,8 @@ namespace Os {
             return BAD_SIZE;
         }
 
-        if (fd.available()) {
-            fd.read(static_cast<U8*>(buffer), size);
+        if (reinterpret_cast<::File*>(m_fd)->available()) {
+            reinterpret_cast<::File*>(m_fd)->read(static_cast<U8*>(buffer), size);
             return OP_OK;
         }
 
@@ -113,7 +108,7 @@ namespace Os {
             return BAD_SIZE;
         }
 
-        size = fd.write(static_cast<char*>(const_cast<void*>(buffer)));
+        size = reinterpret_cast<::File*>(m_fd)->write(static_cast<char*>(const_cast<void*>(buffer)));
 
         if (size == 0) {
             return File::Status::OTHER_ERROR;
@@ -124,7 +119,7 @@ namespace Os {
 
     void File::close() {
         if (this->m_mode != OPEN_NO_MODE) {
-            (void) fd.close();
+            (void) reinterpret_cast<::File*>(m_fd)->close();
         }
         this->m_mode = OPEN_NO_MODE;
     }
