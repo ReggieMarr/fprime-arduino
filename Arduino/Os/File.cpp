@@ -39,7 +39,7 @@ namespace Os {
                 }
                 break;
             case OPEN_APPEND:
-                flags = O_WRONLY | O_CREAT | O_APPEND;
+                flags = FILE_WRITE;
                 break;
             default:
                 FW_ASSERT(0, mode);
@@ -89,11 +89,12 @@ namespace Os {
         }
 
         if (reinterpret_cast<::File*>(m_fd)->available()) {
-            reinterpret_cast<::File*>(m_fd)->read(static_cast<U8*>(buffer), size);
-            return OP_OK;
+            size = reinterpret_cast<::File*>(m_fd)->read(static_cast<U8*>(buffer), size);
+        } else {
+            size = 0;
         }
 
-        return OTHER_ERROR;
+        return OP_OK;
     }
 
     File::Status File::write(const void * buffer, NATIVE_INT_TYPE &size, bool waitForDone) {

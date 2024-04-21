@@ -122,7 +122,70 @@ Status getFileCount(const char* directory, U32& fileCount) {
 }  // end getFileCount
 
 Status appendFile(const char* originPath, const char* destPath, bool createMissingDest) {
-    return OTHER_ERROR;
+
+    FileSystem::Status fs_status;
+    File::Status file_status;
+    FwSizeType fileSize = 0;
+    
+    // Check if files exist
+    if (!SD.exists(originPath)) {
+        return INVALID_PATH;
+    }
+    if (!createMissingDest && !SD.exists(destPath)) {
+        return INVALID_PATH;
+    }
+
+    Os::File source;
+    Os::File destination;
+
+    // Get the file size:
+    fs_status = FileSystem::getFileSize(originPath, fileSize);  //!< gets the size of the file (in bytes) at location path
+    if (FileSystem::OP_OK != fs_status) {
+        return fs_status;
+    }
+
+    file_status = source.open(originPath, Os::File::Mode::OPEN_READ);
+    if (file_status != File::Status::OP_OK) {
+        return OTHER_ERROR;
+    }
+    
+    file_status = destination.open(destPath, Os::File::Mode::OPEN_APPEND);
+    if (file_status != File::Status::OP_OK) {
+        return OTHER_ERROR;
+    }
+
+    static_assert(FILE_SYSTEM_CHUNK_SIZE != 0, "FILE_SYSTEM_CHUNK_SIZE must be >0");
+    U8 fileBuffer[FILE_SYSTEM_CHUNK_SIZE];
+
+    const FwSizeType copyLoopLimit = (fileSize / FILE_SYSTEM_CHUNK_SIZE) + 2;
+
+    FwSizeType loopCounter = 0;
+    NATIVE_INT_TYPE chunkSize;
+
+    while (loopCounter < copyLoopLimit) {
+        chunkSize = FILE_SYSTEM_CHUNK_SIZE;
+        file_status = source.read(&fileBuffer, chunkSize, false);
+        if (file_status != File::OP_OK) {
+            return OTHER_ERROR;
+        }
+
+        if (chunkSize == 0) {
+            // file has been successfully copied
+            break;
+        }
+
+        file_status = destination.write(fileBuffer, chunkSize, true);
+        if (file_status != File::OP_OK) {
+            return OTHER_ERROR;
+        }
+        loopCounter++;
+    }
+    FW_ASSERT(loopCounter < copyLoopLimit);
+
+    (void)source.close();
+    (void)destination.close();
+
+    return fs_status;
 }
 
 Status getFreeSpace(const char* path, FwSizeType& totalBytes, FwSizeType& freeBytes) {
