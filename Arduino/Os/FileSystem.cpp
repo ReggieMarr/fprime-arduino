@@ -112,7 +112,7 @@ Status getFileCount(const char* directory, U32& fileCount) {
 
     ::File fd = SD.open(directory);
 
-    ::File entry = nullptr;
+    ::File entry;
     while ((entry = fd.openNextFile())) {
         fileCount = fileCount + 1;
         entry.close();
