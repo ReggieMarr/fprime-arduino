@@ -108,7 +108,7 @@ namespace Os {
             return BAD_SIZE;
         }
 
-        size = reinterpret_cast<::File*>(m_fd)->write(static_cast<char*>(const_cast<void*>(buffer)));
+        size = reinterpret_cast<::File*>(m_fd)->write(static_cast<char*>(const_cast<void*>(buffer)), size);
 
         if (size == 0) {
             return File::Status::OTHER_ERROR;
